@@ -48,6 +48,27 @@ func init() {
 	Reader = r
 }
 
+func New() {
+	r := &randReader{}
+	n, err := rand.Read(r.entropy[:])
+	if err != nil || n != len(r.entropy) {
+		panic("not enough entropy to fill fastrand reader at startup")
+	}
+	Reader = r
+}
+
+// Provide a way to init reader with an existing entropy
+func SetEntropy(ent [32]byte) {
+	r := &randReader{}
+	r.entropy = ent
+	Reader = r
+}
+
+// Retrieve entropy from Reader
+func GetEntropy() [32]byte {
+	return Reader.(*randReader).entropy
+}
+
 // Read fills b with random data. It always returns len(b), nil.
 func (r *randReader) Read(b []byte) (int, error) {
 	if len(b) == 0 {
